@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inserisci Orologio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Inserisci Orologio</h1>
+
+        <!-- Form per aggiungere un nuovo orologio -->
+        <form method="POST" action="/insert" enctype="multipart/form-data" class="mt-4">
+            <div class="row">
+                <!-- Nr. Sacchetto -->
+                <div class="col-md-4 mb-3">
+                    <label for="nr_sacchetto" class="form-label">Nr. Sacchetto</label>
+                    <input type="number" class="form-control" id="nr_sacchetto" name="nr_sacchetto" required>
+                </div>
+
+                <!-- Posizione -->
+                <div class="col-md-4 mb-3">
+                    <label for="posizione" class="form-label">Posizione</label>
+                    <input type="text" class="form-control" id="posizione" name="posizione" required>
+                </div>
+
+                <!-- Marca -->
+                <div class="col-md-4 mb-3">
+                    <label for="marca" class="form-label">Marca</label>
+                    <input type="text" class="form-control" id="marca" name="marca" required>
+                </div>
+
+                <!-- Modello -->
+                <div class="col-md-4 mb-3">
+                    <label for="modello" class="form-label">Modello</label>
+                    <input type="text" class="form-control" id="modello" name="modello" required>
+                </div>
+
+                <!-- Movimento -->
+                <div class="col-md-4 mb-3">
+                    <label for="movimento" class="form-label">Movimento</label>
+                    <input type="text" class="form-control" id="movimento" name="movimento" required>
+                </div>
+
+                <!-- Carica -->
+                <div class="col-md-4 mb-3">
+                    <label for="carica" class="form-label">Carica</label>
+                    <input type="text" class="form-control" id="carica" name="carica" required>
+                </div>
+
+                <!-- Calibro -->
+                <div class="col-md-4 mb-3">
+                    <label for="calibro" class="form-label">Calibro</label>
+                    <input type="text" class="form-control" id="calibro" name="calibro" required>
+                </div>
+
+                <!-- Nr. Gioielli -->
+                <div class="col-md-4 mb-3">
+                    <label for="nr_gioielli" class="form-label">Nr. Gioielli</label>
+                    <input type="number" class="form-control" id="nr_gioielli" name="nr_gioielli">
+                </div>
+
+                <!-- Riserva di Carica -->
+                <div class="col-md-4 mb-3">
+                    <label for="riserva_di_carica" class="form-label">Riserva di Carica (ore)</label>
+                    <input type="number" class="form-control" id="riserva_di_carica" name="riserva_di_carica">
+                </div>
+
+                <!-- Frequenza alt/h -->
+                <div class="col-md-4 mb-3">
+                    <label for="frequenza_alt_h" class="form-label">Frequenza alt/h</label>
+                    <input type="text" class="form-control" id="frequenza_alt_h" name="frequenza_alt_h">
+                </div>
+
+                <!-- Materiale Cassa -->
+                <div class="col-md-4 mb-3">
+                    <label for="materiale_cassa" class="form-label">Materiale Cassa</label>
+                    <input type="text" class="form-control" id="materiale_cassa" name="materiale_cassa" required>
+                </div>
+
+                <!-- Diametro Cassa -->
+                <div class="col-md-4 mb-3">
+                    <label for="diametro_cassa" class="form-label">Diametro Cassa</label>
+                    <input type="text" class="form-control" id="diametro_cassa" name="diametro_cassa" required>
+                </div>
+
+                <!-- Fondello -->
+                <div class="col-md-4 mb-3">
+                    <label for="fondello" class="form-label">Fondello</label>
+                    <input type="text" class="form-control" id="fondello" name="fondello">
+                </div>
+
+                <!-- Water Resistent -->
+                <div class="col-md-4 mb-3">
+                    <label for="water_resistent" class="form-label">Water Resistent</label>
+                    <input type="text" class="form-control" id="water_resistent" name="water_resistent">
+                </div>
+
+                <!-- Sfera Ora -->
+                <div class="col-md-4 mb-3">
+                    <label for="sfera_ora" class="form-label">Sfera Ora</label>
+                    <input type="text" class="form-control" id="sfera_ora" name="sfera_ora">
+                </div>
+
+                <!-- Sfera Minuti -->
+                <div class="col-md-4 mb-3">
+                    <label for="sfera_minuti" class="form-label">Sfera Minuti</label>
+                    <input type="text" class="form-control" id="sfera_minuti" name="sfera_minuti">
+                </div>
+
+                <!-- Sfera Secondi -->
+                <div class="col-md-4 mb-3">
+                    <label for="sfera_secondi" class="form-label">Sfera Secondi</label>
+                    <input type="text" class="form-control" id="sfera_secondi" name="sfera_secondi">
+                </div>
+
+                <!-- Cronografo -->
+                <div class="col-md-4 mb-3">
+                    <label for="cronografo" class="form-label">Cronografo</label>
+                    <select class="form-select" id="cronografo" name="cronografo">
+                        <option value="Si">Si</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <!-- Innesto Cronografico -->
+                <div class="col-md-4 mb-3">
+                    <label for="innesto_cronografico" class="form-label">Innesto Cronografico</label>
+                    <input type="text" class="form-control" id="innesto_cronografico" name="innesto_cronografico">
+                </div>
+
+                <!-- Smistamento cronografico -->
+                <div class="col-md-4 mb-3">
+                    <label for="smistamento_cronografico" class="form-label">Smistamento Cronografico</label>
+                    <input type="text" class="form-control" id="smistamento_cronografico" name="smistamento_cronografico">
+                </div>
+
+                <!-- Secondi cronografici -->
+                <div class="col-md-4 mb-3">
+                    <label for="secondi_cronografici" class="form-label">Secondi Cronografici</label>
+                    <input type="text" class="form-control" id="secondi_cronografici" name="secondi_cronografici">
+                </div>
+
+                <!-- Minuti cronografici -->
+                <div class="col-md-4 mb-3">
+                    <label for="minuti_cronografici" class="form-label">Minuti cronografici</label>
+                    <input type="text" class="form-control" id="minuti_cronografici" name="minuti_cronografici">
+                </div>
+
+                <!-- Ore cronografiche -->
+                <div class="col-md-4 mb-3">
+                    <label for="ore_cronografiche" class="form-label">Ore cronografiche</label>
+                    <input type="text" class="form-control" id="ore_cronografiche" name="ore_cronografiche">
+                </div>
+
+                <!-- Indicazione data -->
+                <div class="col-md-4 mb-3">
+                    <label for="indicazione_data" class="form-label">Indicazione data</label>
+                    <input type="text" class="form-control" id="indicazione_data" name="indicazione_data">
+                </div>
+
+                <!-- Indicazione giorno settimana -->
+                <div class="col-md-4 mb-3">
+                    <label for="indicazione_giorno_settimana" class="form-label">Indicazione giorno settimana</label>
+                    <input type="text" class="form-control" id="indicazione_giorno_settimana" name="indicazione_giorno_settimana">
+                </div>
+
+                <!-- Indicazione mese -->
+                <div class="col-md-4 mb-3">
+                    <label for="indicazione_mese" class="form-label">Indicazione mese</label>
+                    <input type="text" class="form-control" id="indicazione_mese" name="indicazione_mese">
+                </div>
+
+                <!-- Indicazione riserva di carica -->
+                <div class="col-md-4 mb-3">
+                    <label for="indicazione_riserva_di_carica" class="form-label">Indicazione riserva di carica</label>
+                    <input type="text" class="form-control" id="indicazione_riserva_di_carica" name="indicazione_riserva_di_carica">
+                </div>
+
+                <!-- Ghiera -->
+                <div class="col-md-4 mb-3">
+                    <label for="ghiera" class="form-label">Ghiera</label>
+                    <input type="text" class="form-control" id="ghiera" name="ghiera">
+                </div>
+
+                <!-- Materiale bracciale/cinturino -->
+                <div class="col-md-4 mb-3">
+                    <label for="materiale_bracciale_cinturino" class="form-label">Materiale bracciale/cinturino</label>
+                    <input type="text" class="form-control" id="materiale_bracciale_cinturino" name="materiale_bracciale_cinturino">
+                </div>
+
+                <!-- Chiusura bracciale/cinturino -->
+                <div class="col-md-4 mb-3">
+                    <label for="chiusura_bracciale_cinturino" class="form-label">Chiusura bracciale/cinturino</label>
+                    <input type="text" class="form-control" id="chiusura_bracciale_cinturino" name="chiusura_bracciale_cinturino">
+                </div>
+
+                <!-- Ulteriori complicazioni -->
+                <div class="col-md-4 mb-3">
+                    <label for="ulteriori_complicazioni" class="form-label">Ulteriori complicazioni</label>
+                    <input type="text" class="form-control" id="ulteriori_complicazioni" name="ulteriori_complicazioni">
+                </div>
+                
+                <!-- Foto -->
+                <div class="col-md-4 mb-3">
+                    <label for="foto">Carica Foto:</label>
+                    <input type="file" id="foto" name="foto" accept="image/*"><br><br>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Aggiungi Orologio</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Orologi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Tabella Orologi</h1>
+        
+        <table class="table table-bordered table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Nr. Sacchetto</th>
+                    <th>Posizione</th>
+                    <th>Marca</th>
+                    <th>Modello</th>
+                    <th>Movimento</th>
+                    <th>Carica</th>
+                    <th>Calibro</th>
+                    <th>Nr. Gioielli</th>
+                    <th>Riserva di Carica</th>
+                    <th>Frequenza Alt/H</th>
+                    <th>Materiale Cassa</th>
+                    <th>Diametro Cassa</th>
+                    <th>Fondello</th>
+                    <th>Water Resistant</th>
+                    <th>Sfera Ora</th>
+                    <th>Sfera Minuti</th>
+                    <th>Sfera Secondi</th>
+                    <th>Cronografo</th>
+                    <th>Innesto Cronografico</th>
+                    <th>Smistamento Cronografico</th>
+                    <th>Secondi Cronografici</th>
+                    <th>Minuti Cronografici</th>
+                    <th>Ore Cronografiche</th>
+                    <th>Indicazione Data</th>
+                    <th>Indicazione Giorno Settimana</th>
+                    <th>Indicazione Mese</th>
+                    <th>Indicazione Riserva di Carica</th>
+                    <th>Ghiera</th>
+                    <th>Materiale Bracciale-Cinturino</th>
+                    <th>Chiusura Bracciale-Cinturino</th>
+                    <th>Ulteriori Complicazioni</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orologio in orologi %}
+                <tr>
+                    <td>{{ orologio.nr_sacchetto }}</td>
+                    <td>{{ orologio.posizione }}</td>
+                    <td>{{ orologio.marca }}</td>
+                    <td>{{ orologio.modello }}</td>
+                    <td>{{ orologio.movimento }}</td>
+                    <td>{{ orologio.carica }}</td>
+                    <td>{{ orologio.calibro }}</td>
+                    <td>{{ orologio.nr_gioielli }}</td>
+                    <td>{{ orologio.riserva_di_carica }}</td>
+                    <td>{{ orologio.frequenza_alt_h }}</td>
+                    <td>{{ orologio.materiale_cassa }}</td>
+                    <td>{{ orologio.diametro_cassa }}</td>
+                    <td>{{ orologio.fondello }}</td>
+                    <td>{{ orologio.water_resistent }}</td>
+                    <td>{{ orologio.sfera_ora }}</td>
+                    <td>{{ orologio.sfera_minuti }}</td>
+                    <td>{{ orologio.sfera_secondi }}</td>
+                    <td>{{ orologio.cronografo }}</td>
+                    <td>{{ orologio.innesto_cronografico }}</td>
+                    <td>{{ orologio.smistamento_cronografico }}</td>
+                    <td>{{ orologio.secondi_cronografici }}</td>
+                    <td>{{ orologio.minuti_cronografici }}</td>
+                    <td>{{ orologio.ore_cronografiche }}</td>
+                    <td>{{ orologio.indicazione_data }}</td>
+                    <td>{{ orologio.indicazione_giorno_settimana }}</td>
+                    <td>{{ orologio.indicazione_mese }}</td>
+                    <td>{{ orologio.indicazione_riserva_di_carica }}</td>
+                    <td>{{ orologio.ghiera }}</td>
+                    <td>{{ orologio.materiale_bracciale_cinturino }}</td>
+                    <td>{{ orologio.chiusura_bracciale_cinturino }}</td>
+                    <td>{{ orologio.ulteriori_complicazioni }}</td>
+                    <td>
+                        {% if orologio.foto %}
+                        <img src="{{ url_for('static', filename='uploads/' + orologio.foto) }}" alt="Orologio" width="100">
+                        {% else %}
+                        Nessuna foto
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
