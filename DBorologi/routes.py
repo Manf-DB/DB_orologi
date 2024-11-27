@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 
-from DBorologi import Orologio, allowed_file, db
+from DBorologi import Orologio, allowed_file, db, query_database
 
 def init_routes(app):
     # Route principale per visualizzare e aggiungere orologi
@@ -119,3 +119,67 @@ def init_routes(app):
     def vista():
         orologi = Orologio.query.all()
         return render_template('vista.html', orologi=orologi)
+    
+    @app.route('/filtro')
+    def filtro():
+        columns = [column.name for column in Orologio.__table__.columns]
+        return render_template('filtro.html', columns=columns)
+
+    @app.route('/get_column_values', methods=['POST'])
+    def get_column_values():
+        data = request.json
+        column_name = data.get('column')
+        filters = data.get('filters', [])
+
+        # Controlla se la colonna è valida
+        if column_name not in [column.name for column in Orologio.__table__.columns]:
+            return jsonify({'error': 'Colonna non valida'}), 400
+
+        try:
+            # Crea una query iniziale
+            query = db.session.query(Orologio)
+
+            # Applica i filtri attivi
+            for f in filters:
+                col = f.get('column')
+                val = f.get('value')
+                if col and val and col in [column.name for column in Orologio.__table__.columns]:
+                    query = query.filter(getattr(Orologio, col) == val)
+
+            # Ottieni i valori unici della colonna selezionata
+            values = query.with_entities(getattr(Orologio, column_name)).distinct().all()
+            values = [value[0] for value in values if value[0] is not None]
+            return jsonify(values)
+        except Exception as e:
+            print(f"Errore durante la query: {e}")
+            return jsonify({'error': 'Errore durante il recupero dei dati'}), 500
+
+
+    @app.route('/filter', methods=['POST'])
+    def filter():
+        data = request.get_json()  # Usa request.get_json() per recuperare i dati JSON
+        filters = data.get('filters', [])
+
+        try:
+            # Crea una query iniziale
+            query = db.session.query(Orologio)
+
+            # Applica i filtri
+            for f in filters:
+                column_name = f.get('column')
+                value = f.get('value')
+                if column_name and value and column_name in [col.name for col in Orologio.__table__.columns]:
+                    query = query.filter(getattr(Orologio, column_name) == value)
+
+            # Esegui la query
+            results = query.all()
+
+            # Serializza i risultati in formato JSON
+            data = [
+                {col.name: getattr(row, col.name) for col in Orologio.__table__.columns}
+                for row in results
+            ]
+            return jsonify(data)
+        except Exception as e:
+            print(f"Errore durante la query: {e}")
+            return jsonify({'error': 'Errore durante il recupero dei dati'}), 500

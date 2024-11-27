@@ -1,10 +1,13 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import sqlite3
+from flask_cors import CORS  # Importa l'estensione Flask-CORS
 
 
 
 app = Flask(__name__)
+CORS(app)  # Abilita CORS per tutte le origini
 
 # Configurazione database SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orologi.db'
@@ -62,6 +65,14 @@ class Orologio(db.Model):
 # Creazione del database
 with app.app_context():
     db.create_all()
+
+def query_database(query, params):
+    conn = sqlite3.connect('orologi.db')  # mio database
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    results = cursor.fetchall()
+    conn.close()
+    return results
 
 from .routes import init_routes  # Importa le route
 # Inizializza le route

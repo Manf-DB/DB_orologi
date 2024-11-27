@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtro Dinamico</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Filtro Dinamico</h1>
+    <div id="filters">
+        <div class="filter">
+            <select class="column-select">
+                <option value="">Seleziona una colonna</option>
+                {% for column in columns %}
+                    <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+            </select>
+            <select class="value-select">
+                <option value="">Seleziona un valore</option>
+            </select>
+        </div>
+    </div>
+    <button id="add-filter">Aggiungi Filtro</button>
+    <button id="apply-filter">Applica Filtri</button>
+    <button id="clear-filters">Pulisci</button>
+
+
+    <table border="1" id="results">
+        <thead>
+            <tr>
+                {% for column in columns %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let maxFilters = 5;
+
+        $(document).on('change', '.column-select', function () {
+            const currentFilter = $(this).closest('.filter');
+            const column = $(this).val(); // Nome della colonna selezionata
+            const valueSelect = currentFilter.find('.value-select');
+
+            // Recupera tutti i filtri attivi
+            const filters = [];
+            $('.filter').each(function () {
+                const col = $(this).find('.column-select').val();
+                const val = $(this).find('.value-select').val();
+                if (col && val) {
+                    filters.push({ column: col, value: val });
+                }
+            });
+
+            if (column) {
+                // Richiesta al server per ottenere i valori aggiornati in base ai filtri
+                $.ajax({
+                    url: '/get_column_values',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ column: column, filters: filters }),
+                    success: function (data) {
+                        // Popola il menu a tendina dei valori
+                        valueSelect.empty().append('<option value="">Seleziona un valore</option>');
+                        data.forEach(value => {
+                            valueSelect.append(`<option value="${value}">${value}</option>`);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Errore nella richiesta:', error);
+                        alert('Si è verificato un errore durante il recupero dei dati.');
+                    }
+                });
+            } else {
+                // Resetta il menu se nessuna colonna è selezionata
+                valueSelect.empty().append('<option value="">Seleziona un valore</option>');
+            }
+        });
+
+
+
+        $('#add-filter').click(function () {
+            if ($('#filters .filter').length < maxFilters) {
+                const newFilter = $('#filters .filter:first').clone();
+                newFilter.find('select').val('');
+                $('#filters').append(newFilter);
+            } else {
+                alert('Puoi aggiungere al massimo 5 filtri.');
+            }
+        });
+
+        $('#apply-filter').click(function () {
+            const filters = [];
+            $('#filters .filter').each(function () {
+                const column = $(this).find('.column-select').val();
+                const value = $(this).find('.value-select').val();
+                if (column && value) {
+                    filters.push({ column: column, value: value });
+                }
+            });
+
+            $.ajax({
+                url: '/filter',
+                type: 'POST',
+                contentType: 'application/json', // Specifica il tipo di contenuto
+                data: JSON.stringify({ filters: filters }), // Invia i dati come stringa JSON
+                success: function (data) {
+                    const tbody = $('#results tbody').empty();
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="30">Nessun risultato trovato</td></tr>');
+                    } else {
+                        data.forEach(row => {
+                            const tr = $('<tr>');
+                            {% for column in columns %}
+                                tr.append(`<td>${row['{{ column }}'] || ''}</td>`);
+                            {% endfor %}
+                            tbody.append(tr);
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Errore nella richiesta:', error);
+                    alert('Si è verificato un errore durante il recupero dei dati.');
+                }
+            });
+        });
+
+        $('#clear-filters').click(function () {
+            // Rimuovi tutti i filtri eccetto il primo
+            $('#filters .filter').not(':first').remove();
+
+            // Resetta i menu a tendina del primo filtro
+            const firstFilter = $('#filters .filter:first');
+            firstFilter.find('.column-select').val('');
+            firstFilter.find('.value-select').empty().append('<option value="">Seleziona un valore</option>');
+
+            // Svuota la tabella dei risultati
+            $('#results tbody').empty().append('<tr><td colspan="30">Nessun risultato</td></tr>');
+        });
+
+
+    </script>
+</body>
+</html>
