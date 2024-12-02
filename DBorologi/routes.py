@@ -183,3 +183,19 @@ def init_routes(app):
         except Exception as e:
             print(f"Errore durante la query: {e}")
             return jsonify({'error': 'Errore durante il recupero dei dati'}), 500
+        
+
+    @app.route('/details/<int:nr_sacchetto>', methods=['GET'])
+    def get_details(nr_sacchetto):
+        # Query per selezionare il record che corrisponde al nr_sacchetto
+        orologio = Orologio.query.filter_by(nr_sacchetto=nr_sacchetto).first()
+
+        # Se il record non viene trovato, restituiamo un messaggio di errore
+        if not orologio:
+            return f"<h1>Nessun record trovato per nr_sacchetto: {nr_sacchetto}</h1>", 404
+
+        # Converte l'oggetto orologio in un dizionario per passarlo al template
+        result_dict = {col.name: getattr(orologio, col.name) for col in Orologio.__table__.columns}
+
+        # Passa il dizionario dei dettagli al template HTML
+        return render_template('details.html', nr_sacchetto=nr_sacchetto, details=result_dict)

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filtro Dinamico</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -25,16 +26,20 @@
     <button id="apply-filter">Applica Filtri</button>
     <button id="clear-filters">Pulisci</button>
 
-
     <table border="1" id="results">
         <thead>
             <tr>
-                {% for column in columns %}
-                    <th>{{ column }}</th>
-                {% endfor %}
+                <th>Nr Sacchetto</th>
+                <th>Posizione</th>
+                <th>Marca</th>
+                <th>Dettagli</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <tr>
+                <td colspan="4">Nessun risultato</td>
+            </tr>
+        </tbody>
     </table>
 
     <script>
@@ -105,19 +110,37 @@
             $.ajax({
                 url: '/filter',
                 type: 'POST',
-                contentType: 'application/json', // Specifica il tipo di contenuto
-                data: JSON.stringify({ filters: filters }), // Invia i dati come stringa JSON
+                contentType: 'application/json',
+                data: JSON.stringify({ filters: filters }),
                 success: function (data) {
                     const tbody = $('#results tbody').empty();
                     if (data.length === 0) {
-                        tbody.append('<tr><td colspan="30">Nessun risultato trovato</td></tr>');
+                        tbody.append('<tr><td colspan="4">Nessun risultato trovato</td></tr>');
                     } else {
                         data.forEach(row => {
                             const tr = $('<tr>');
-                            {% for column in columns %}
-                                tr.append(`<td>${row['{{ column }}'] || ''}</td>`);
-                            {% endfor %}
+                            tr.append(`<td>${row['nr_sacchetto'] || ''}</td>`);
+                            tr.append(`<td>${row['posizione'] || ''}</td>`);
+                            tr.append(`<td>${row['marca'] || ''}</td>`);
+                            tr.append(`
+                                <td>
+                                    <button class="details-button" data-id="${row['nr_sacchetto']}" style="background:none; border:none; cursor:pointer;">
+                                        <i class="fas fa-eye" style="color:blue; font-size:20px;"></i>
+                                    </button>
+                                </td>
+
+                            `);
                             tbody.append(tr);
+                        });
+
+                        // Aggiungi evento click per i pulsanti dei dettagli
+                        $('.details-button').click(function () {
+                            const id = $(this).data('id'); // Ottieni nr_sacchetto come ID
+                            if (id) {
+                                window.open(`/details/${id}`, '_blank'); // Apri una nuova scheda con il dettaglio
+                            } else {
+                                alert("Errore: Nr Sacchetto non trovato per questa riga.");
+                            }
                         });
                     }
                 },
@@ -129,19 +152,10 @@
         });
 
         $('#clear-filters').click(function () {
-            // Rimuovi tutti i filtri eccetto il primo
             $('#filters .filter').not(':first').remove();
-
-            // Resetta i menu a tendina del primo filtro
-            const firstFilter = $('#filters .filter:first');
-            firstFilter.find('.column-select').val('');
-            firstFilter.find('.value-select').empty().append('<option value="">Seleziona un valore</option>');
-
-            // Svuota la tabella dei risultati
-            $('#results tbody').empty().append('<tr><td colspan="30">Nessun risultato</td></tr>');
+            $('#filters .filter:first').find('select').val('');
+            $('#results tbody').empty().append('<tr><td colspan="4">Nessun risultato</td></tr>');
         });
-
-
     </script>
 </body>
 </html>
