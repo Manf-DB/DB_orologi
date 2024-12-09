@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)  # Abilita CORS per tutte le origini
 
 # Configurazione database SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orologi.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gestione_orologi.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join('DBorologi', 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limite di 16 MB per i file caricati
@@ -67,12 +67,80 @@ with app.app_context():
     db.create_all()
 
 def query_database(query, params):
-    conn = sqlite3.connect('orologi.db')  # mio database
+    conn = sqlite3.connect('gestione_orologi.db')  # mio database
     cursor = conn.cursor()
     cursor.execute(query, params)
     results = cursor.fetchall()
     conn.close()
     return results
+
+# Funzione per caricare la foto
+def save_photo(photo):
+    if photo:
+        # Costruisci il nome del file e il percorso
+        filename = photo.filename
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        photo.save(filepath)
+        return filename  # Restituisce solo il nome del file per salvarlo nel database
+    return None
+
+# Funzione per recuperare i dettagli di un orologio dal database in modo dinamico
+def get_details_from_db(nr_sacchetto):
+    db_path = os.path.join("instance\gestione_orologi.db")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Recupera i nomi delle colonne dalla tabella 'orologio'
+    cursor.execute("PRAGMA table_info(orologio);")
+    columns = cursor.fetchall()
+
+    # Crea un dizionario per memorizzare i dati
+    column_names = [column[1] for column in columns]  # La colonna 1 contiene i nomi delle colonne
+    query = "SELECT * FROM orologio WHERE nr_sacchetto = ?"
+    cursor.execute(query, (nr_sacchetto,))
+    data = cursor.fetchone()
+
+    conn.close()
+    
+    # Se i dati sono stati trovati, crea un dizionario con i nomi delle colonne come chiavi
+    if data:
+        return dict(zip(column_names, data))
+    return None
+
+def save_details_to_db(details):
+    db_path = os.path.join("instance\gestione_orologi.db")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Ottieni i nomi delle colonne
+    cursor.execute("PRAGMA table_info(orologio);")
+    columns = cursor.fetchall()
+    column_names = [column[1] for column in columns]
+    # Aggiungi chiavi mancanti a `details` con valori predefiniti
+    for col in column_names:
+        if col not in details:
+           details [col] = col  # O un valore predefinito, se applicabile
+
+    # Crea una lista per i valori da aggiornare (ignora nr_sacchetto per l'aggiornamento)
+    values = [details[col] for col in column_names if col != 'nr_sacchetto']
+    
+    # Crea la clausola SET dinamicamente
+    set_clause = ", ".join([f"{col} = ?" for col in column_names if col != 'nr_sacchetto'])
+    
+    # Aggiungi nr_sacchetto alla lista dei valori
+    values.append(details['nr_sacchetto'])
+    
+    # Costruisci la query dinamica
+    query = f"UPDATE orologio SET {set_clause} WHERE nr_sacchetto = ?"
+    
+    #print("Query SQL:", query)  # DEBUG: Mostra la query generata
+    print("Valori SQL:", values)  # DEBUG: Mostra i valori passati
+    
+    # Esegui la query di aggiornamento
+    cursor.execute(query, values)
+    conn.commit()
+    conn.close()
+
 
 from .routes import init_routes  # Importa le route
 # Inizializza le route

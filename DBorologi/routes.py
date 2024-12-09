@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 
-from DBorologi import Orologio, allowed_file, db, query_database
+from DBorologi import Orologio, allowed_file, db, query_database, save_photo, get_details_from_db, save_details_to_db
 
 def init_routes(app):
     # Route principale per visualizzare e aggiungere orologi
@@ -183,7 +183,6 @@ def init_routes(app):
         except Exception as e:
             print(f"Errore durante la query: {e}")
             return jsonify({'error': 'Errore durante il recupero dei dati'}), 500
-        
 
     @app.route('/details/<int:nr_sacchetto>', methods=['GET'])
     def get_details(nr_sacchetto):
@@ -199,3 +198,60 @@ def init_routes(app):
 
         # Passa il dizionario dei dettagli al template HTML
         return render_template('details.html', nr_sacchetto=nr_sacchetto, details=result_dict)
+    
+    @app.route('/upload_photo', methods=['POST'])
+    def upload_photo():
+        if 'photo' not in request.files:
+            return "Nessun file selezionato", 400
+        file = request.files['photo']
+        if file.filename == '':
+            return "Nessun file scelto", 400
+        if file:
+            # Salva il file nella directory di caricamento
+            filename = file.filename
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            
+            # Reindirizza alla pagina principale con la foto aggiornata
+            return redirect(url_for('show_details', foto=filename))
+            
+    @app.route('/details/<int:nr_sacchetto>')
+    def show_details():
+        nr_sacchetto = request.args.get('nr_sacchetto')  # Recupera l'ID dell'orologio dalla query string
+        details = get_details_from_db(nr_sacchetto)
+        if details:
+            return render_template('details.html', details=details)
+        return "Orologio non trovato", 404
+    
+    @app.route('/save_details', methods=['POST'])
+    def save_details():
+        nr_sacchetto = request.form['nr_sacchetto']
+        
+        # Recuperiamo tutte le chiavi del form dinamicamente
+        details = {}
+        for key in request.form:
+            details[key] = request.form[key]
+
+        # Aggiungiamo anche la foto, se presente
+        if 'photo' in request.files:
+            photo = request.files['photo']
+            details['foto'] = save_photo(photo)  # Salva la foto e ottieni il nome del file
+            print(f"Nuova foto caricata: {details['foto']}")  # DEBUG: Mostra il nome del file
+
+        details['nr_sacchetto'] = nr_sacchetto  # Manteniamo sempre il nr_sacchetto per identificare l'orologio
+        
+        # Recupera i dettagli esistenti prima di fare modifiche
+        existing_details = get_details_from_db(nr_sacchetto)
+        
+        # Se non viene caricata una nuova foto, mantieni quella esistente
+        if 'foto' not in details or not details['foto']:
+            details['foto'] = existing_details['foto']
+            print("Foto non caricata, manteniamo quella esistente:", details['foto'])  # DEBUG
+
+        print("Dati che verranno aggiornati nel database:", details)  # DEBUG
+
+        # Salva i dettagli aggiornati nel database
+        save_details_to_db(details)
+        
+        # Reindirizza alla pagina dei dettagli con la foto aggiornata
+        return redirect(url_for('show_details', nr_sacchetto=nr_sacchetto))

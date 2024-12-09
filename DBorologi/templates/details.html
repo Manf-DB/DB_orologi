@@ -4,20 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dettagli Orologio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Icone Font Awesome -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #6200ea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .edit-button, .save-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .save-button {
+            display: none; /* Inizialmente nascosto */
+        }
+        .details-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr; /* Quattro colonne */
+            gap: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .photo-column {
+            text-align: center;
+            padding: 10px;
+        }
+        .photo-column img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .photo-column input[type="file"] {
+            display: none;
+        }
+        .photo-column button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: white;
+            background-color: #6200ea;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none; /* Inizialmente nascosto */
+        }
+        .photo-column button:hover {
+            background-color: #4a00d4;
+        }
+        .details-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f4f4f9;
+        }
+        .detail-item input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            display: none;
+        }
+        .detail-item .field-name {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px; /* Spazio tra nome del campo e valore */
+        }
+        .detail-item .field-value {
+            font-style: italic;
+            color: #000;
+        }
+        .detail-item.editing .field-value {
+            display: none;
+        }
+        .detail-item.editing input {
+            display: block;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #6200ea;
+            color: white;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Dettagli Orologio - nr_sacchetto: {{ nr_sacchetto }}</h1>
-    <table border="1">
-        <tr>
-            <th>Colonna</th>
-            <th>Valore</th>
-        </tr>
-        {% for col, value in details.items() %}
-            <tr>
-                <td>{{ col }}</td>
-                <td>{{ value }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-</body>
+    <header>
+        <h1>Dettagli Orologio - nr_sacchetto: {{ details['nr_sacchetto'] }}</h1>
+        <button id="editButton" class="edit-button" onclick="toggleEditMode()">
+            <i class="fas fa-edit"></i> Modifica
+        </button>
+        <button class="save-button" onclick="saveChanges()">
+            Salva Modifiche
+        </button>
+    </header>
+
+    <div class="details-container">
+        <!-- Colonna Foto -->
+        <div class="photo-column">
+            <img id="photo" src="{{ url_for('static', filename='uploads/' + (details['foto'] if details['foto'] else 'placeholder.jpg')) }}" alt="Foto Orologio">
+            <form id="photo-form" action="/save_details" method="POST" enctype="multipart/form-data">
+                <input type="file" name="photo" accept="image/*" id="upload-photo">
+                <input type="hidden" name="nr_sacchetto" value="{{ details['nr_sacchetto'] }}">
+                <input type="file" name="photo" accept="image/*">
+                <button type="submit" id="change-photo-button">Cambia Foto</button>
+            </form>
+        </div>
+
+        <!-- Colonne Dati -->
+        <div class="details-column">
+            {% for col, value in details.items() %}
+                {% if col != 'foto' %}
+                    <div class="detail-item" id="item-{{ col }}">
+                        <span class="field-name">{{ col }}</span>
+                        <span class="field-value">{{ value }}</span>
+                        <input type="text" name="{{ col }}" value="{{ value }}">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <footer>
+            © 2024 Dettagli Orologio
+        </footer>
+    </body>
+    <script>
+        let isEditMode = false;
+
+        // Funzione per attivare/disattivare la modalità di modifica
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const detailItems = document.querySelectorAll('.detail-item');
+            const photoButton = document.getElementById('change-photo-button');
+            const uploadPhotoInput = document.getElementById('upload-photo');
+            const saveButton = document.querySelector('.save-button');
+            document.getElementById('editButton').style.display = 'none'; // Nasconde il pulsante Modifica
+
+            detailItems.forEach(item => {
+                item.classList.toggle('editing', isEditMode);
+            });
+
+            if (isEditMode) {
+                photoButton.style.display = "inline-block";
+                uploadPhotoInput.style.display = "inline-block";
+                saveButton.style.display = "inline-block"; // Mostra il pulsante di salvataggio                
+            } else {
+                photoButton.style.display = "none";
+                uploadPhotoInput.style.display = "none";
+                saveButton.style.display = "none"; // Nasconde il pulsante di salvataggio
+            }
+        }
+
+        // Funzione per salvare le modifiche nel database
+        function saveChanges() {
+            const formData = new FormData(document.getElementById('photo-form'));
+            const inputs = document.querySelectorAll('.detail-item input');
+            
+            inputs.forEach(input => {
+                formData.append(input.name, input.value); // Aggiungi i campi di testo al form
+            });
+
+            fetch('/save_details', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Modifiche salvate con successo!');
+                    window.location.href = '/details/{{ details['nr_sacchetto'] }}'; // Reindirizza alla schermata dei dettagli
+                } else {
+                    alert('Errore nel salvataggio delle modifiche.');
+                }
+            })
+            .catch(error => {
+                alert('Errore nel salvataggio delle modifiche: ' + error);
+            });
+        }
+    </script>
 </html>
